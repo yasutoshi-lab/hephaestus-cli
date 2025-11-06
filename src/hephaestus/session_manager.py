@@ -68,6 +68,14 @@ class SessionManager:
             )
             logger.info(f"Created tmux session: {self.session_name}")
 
+            # Enable mouse mode for easier pane navigation
+            session.set_option("mouse", "on", _global=True)
+
+            # Enable pane border titles
+            session.set_option("pane-border-status", "top", _global=False)
+            session.set_option("pane-border-format", "#{pane_index}: #{pane_title}", _global=False)
+            logger.info("Enabled mouse mode and pane border titles")
+
             # Get the default window
             window = session.windows[0]
 
@@ -113,20 +121,27 @@ class SessionManager:
         """
         # Determine agent name
         if agent_type == "master":
-            agent_name = "master"
+            agent_name = "Master Agent"
             log_file = self.work_dir / "logs" / "master.log"
         else:
-            agent_name = f"worker-{agent_id}"
+            agent_name = f"Worker-{agent_id}"
             log_file = self.work_dir / "logs" / f"worker_{agent_id}.log"
 
         # Create log directory if it doesn't exist
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
-        # Set pane title
-        pane.send_keys(f"echo -ne '\\033]0;{agent_name}\\007'")
+        # Set pane title using tmux's select-pane command
+        pane.select_pane()
+        pane.cmd("select-pane", "-T", agent_name)
 
-        # Change to work directory
-        pane.send_keys(f"cd {self.work_dir.parent}")
+        # Determine agent working directory
+        if agent_type == "master":
+            agent_work_dir = self.work_dir / ".claude" / "master"
+        else:
+            agent_work_dir = self.work_dir / ".claude" / "worker"
+
+        # Change to agent-specific directory
+        pane.send_keys(f"cd {agent_work_dir}")
 
         # Display agent information
         pane.send_keys("clear")

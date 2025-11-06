@@ -11,7 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from .utils.logger import setup_logger
-from .utils.file_utils import create_directory_structure, get_work_directory
+from .utils.file_utils import create_directory_structure, get_work_directory, create_agent_config_files
 from .config import create_default_config, ConfigManager
 from .session_manager import SessionManager
 
@@ -90,6 +90,10 @@ def init_command(workers: int, force: bool):
             config.workers.count = workers
             manager = ConfigManager(config_path)
             manager.save(config)
+
+        # Create agent configuration files
+        console.print("[cyan]Creating agent configuration files (CLAUDE.md)...[/cyan]")
+        create_agent_config_files(work_dir)
 
         # Success message
         table = Table(title="Initialization Complete", show_header=False)
