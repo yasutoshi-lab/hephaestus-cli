@@ -18,7 +18,7 @@ class AgentConfig:
     """Configuration for an agent (Master or Worker)."""
 
     enabled: bool = True
-    command: str = "claude"
+    command: str = "claude --dangerously-skip-permissions"
     args: list = field(default_factory=list)
 
 
@@ -27,7 +27,7 @@ class WorkersConfig:
     """Configuration for Worker agents."""
 
     count: int = 3
-    command: str = "claude"
+    command: str = "claude --dangerously-skip-permissions"
     args: list = field(default_factory=list)
 
 
