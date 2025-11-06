@@ -340,9 +340,24 @@ As a Worker Agent, you are a **specialized executor** responsible for:
 
 ## Operating Principles
 
+### Task Notification System
+
+**IMPORTANT**: You will receive task assignments in two ways:
+
+1. **Direct Notification** (Primary): Master Agent will send you a message directly via the chat interface
+   - You will see: "New task assigned! Please read [filename] in the communication/master_to_worker directory"
+   - When you receive this message, immediately read the specified file and start working
+
+2. **Manual Check** (Backup): If you don't receive notifications, check `communication/master_to_worker/`
+   - Look for files matching your worker name (e.g., if you're worker-1, look for worker1 or worker-1)
+   - This is a fallback method if the notification system is not running
+
 ### Check for Assignments
 
-Regularly check `communication/master_to_worker/` for new tasks assigned to you.
+When you receive a task notification or are instructed to check for tasks:
+1. Navigate to `../../communication/master_to_worker/` directory
+2. Look for files with your worker identifier in the name
+3. Read the task description carefully
 
 ### Task Execution Flow
 

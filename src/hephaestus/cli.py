@@ -14,6 +14,8 @@ from .utils.logger import setup_logger
 from .utils.file_utils import create_directory_structure, get_work_directory, create_agent_config_files
 from .config import create_default_config, ConfigManager
 from .session_manager import SessionManager
+from .agent_communicator import AgentCommunicator
+from .task_distributor import TaskDistributor
 
 console = Console()
 logger = None  # Will be initialized in commands
@@ -283,6 +285,99 @@ def status_command():
     except Exception as e:
         console.print(f"[red]✗ Failed to get status:[/red] {e}")
         logger.error(f"Status check failed: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command(name="monitor")
+@click.option(
+    "--interval",
+    "-i",
+    default=5,
+    type=int,
+    help="Task check interval in seconds (default: 5)",
+)
+@click.option(
+    "--max-iterations",
+    "-m",
+    default=120,
+    type=int,
+    help="Maximum monitoring iterations (default: 120, ~10 minutes)",
+)
+def monitor_command(interval: int, max_iterations: int):
+    """Monitor and auto-distribute tasks to workers.
+
+    This command starts a background process that monitors the
+    communication/master_to_worker directory and automatically
+    notifies workers about new task assignments via tmux send-keys.
+    """
+    init_logger()
+
+    work_dir = get_work_directory()
+
+    # Check if initialized
+    if not work_dir.exists():
+        console.print("[yellow]Not initialized. Run 'hephaestus init' first.[/yellow]")
+        sys.exit(1)
+
+    try:
+        # Load configuration
+        config_path = work_dir / "config.yaml"
+        config_manager = ConfigManager(config_path)
+        config = config_manager.load()
+
+        # Create session manager to check if session exists
+        session_manager = SessionManager(config, work_dir)
+
+        if not session_manager.session_exists():
+            console.print(
+                Panel(
+                    f"[red]No active session found: {config.tmux.session_name}[/red]\n\n"
+                    "Start the session first with: [bold]hephaestus attach --create[/bold]",
+                    title="Session Not Running",
+                    border_style="red",
+                )
+            )
+            sys.exit(1)
+
+        # Create communicator and distributor
+        communicator = AgentCommunicator(config.tmux.session_name, work_dir)
+        distributor = TaskDistributor(config, work_dir, communicator)
+
+        # Display monitoring info
+        console.print(
+            Panel(
+                f"[cyan]Monitoring task distribution[/cyan]\n\n"
+                f"Session: {config.tmux.session_name}\n"
+                f"Workers: {config.workers.count}\n"
+                f"Check interval: {interval}s\n"
+                f"Max duration: ~{(interval * max_iterations) // 60} minutes",
+                title="Task Monitor Started",
+                border_style="cyan",
+            )
+        )
+
+        console.print("\n[yellow]Press Ctrl+C to stop monitoring[/yellow]\n")
+
+        # Start monitoring
+        try:
+            distributor.monitor_and_distribute_tasks(
+                interval=interval,
+                max_iterations=max_iterations
+            )
+
+            # Show final status
+            status = distributor.get_status_summary()
+            console.print("\n[green]✓[/green] Monitoring completed")
+            console.print(f"Tasks: {status['total']} total, {status['completed']} completed")
+
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]Monitoring stopped by user[/yellow]")
+            status = distributor.get_status_summary()
+            console.print(f"Tasks: {status['total']} total, {status['completed']} completed")
+
+    except Exception as e:
+        console.print(f"[red]✗ Monitoring failed:[/red] {e}")
+        logger.error(f"Monitor failed: {e}", exc_info=True)
         sys.exit(1)
 
 
