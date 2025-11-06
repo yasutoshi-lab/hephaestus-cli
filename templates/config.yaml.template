@@ -1,0 +1,31 @@
+# Hephaestus-CLI Configuration File
+# Version: 1.0
+
+version: 1.0
+
+agents:
+  master:
+    enabled: true
+    command: "claude-code"
+    args: []
+  workers:
+    count: 3  # Worker count (adjustable)
+    command: "claude-code"
+    args: []
+
+monitoring:
+  health_check_interval: 30  # seconds
+  retry_attempts: 3
+  retry_delay: 5  # seconds
+
+communication:
+  format: "markdown"
+  encoding: "utf-8"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+tmux:
+  session_name: "hephaestus"
+  layout: "tiled"  # Options: even-horizontal, even-vertical, main-horizontal, main-vertical, tiled

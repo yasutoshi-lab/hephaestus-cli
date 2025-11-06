@@ -1,0 +1,17 @@
+# Task Message
+---
+metadata:
+  id: "{task_id}"
+  type: "{message_type}"  # task|status|result|error
+  from: "{sender}"  # master|worker-{id}
+  to: "{recipient}"  # master|worker-{id}
+  timestamp: "{timestamp}"  # ISO 8601 format
+  priority: "{priority}"  # high|medium|low
+---
+
+## Content
+
+{message_content}
+
+---
+checksum: "{checksum}"
