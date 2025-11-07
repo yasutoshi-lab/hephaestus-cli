@@ -17,7 +17,7 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 ## Prerequisites
 
 - Python 3.10 or higher
-- tmux (installed on your system)
+- tmux
 - claude CLI installed and configured
 - Linux operating system
 
@@ -155,8 +155,6 @@ hephaestus init --workers 2 --force
 ## References
 
 - [Claude Code](https://github.com/anthropics/claude-code)
-- [Claude-Code-Communication](https://github.com/nishimoto265/Claude-Code-Communication)
-- [tmux](https://github.com/tmux/tmux)
 
 ## License
 
