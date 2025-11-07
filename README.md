@@ -153,8 +153,6 @@ hephaestus init --workers 2 --force
 ## 参考資料
 
 - [Claude Code](https://github.com/anthropics/claude-code)
-- [Claude-Code-Communication](https://github.com/nishimoto265/Claude-Code-Communication)
-- [tmux](https://github.com/tmux/tmux)
 
 ## ライセンス
 
