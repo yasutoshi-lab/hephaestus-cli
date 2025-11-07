@@ -1,4 +1,6 @@
-# Hephaestus-CLI
+# 開発中です
+
+## Hephaestus-CLI
 
 複数のLLMエージェント（Master + Workers）を管理し、複雑なタスクを協調実行するためのtmuxベースのマルチエージェントCLIツールです。
 
