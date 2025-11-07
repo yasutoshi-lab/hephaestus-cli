@@ -82,16 +82,16 @@ class CommunicationLogWidget(Static):
     def __init__(self, work_dir: Path, **kwargs):
         super().__init__(**kwargs)
         self.work_dir = work_dir
-        self.log = Log(highlight=True, max_lines=100)
+        self.log_widget = Log(highlight=True, max_lines=100)
 
     def compose(self) -> ComposeResult:
         """Compose the communication log."""
-        yield self.log
+        yield self.log_widget
 
     def add_message(self, message: str):
         """Add a message to the communication log."""
         timestamp = datetime.now().strftime("%H:%M:%S")
-        self.log.write_line(f"[dim]{timestamp}[/dim] {message}")
+        self.log_widget.write_line(f"[dim]{timestamp}[/dim] {message}")
 
 
 class HephaestusDashboard(App):
