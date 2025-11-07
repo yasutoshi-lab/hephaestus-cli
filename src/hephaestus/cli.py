@@ -16,6 +16,8 @@ from .config import create_default_config, ConfigManager
 from .session_manager import SessionManager
 from .agent_communicator import AgentCommunicator
 from .task_distributor import TaskDistributor
+from .dashboard import run_dashboard
+from .log_viewer import LogStreamer
 
 console = Console()
 logger = None  # Will be initialized in commands
@@ -378,6 +380,137 @@ def monitor_command(interval: int, max_iterations: int):
     except Exception as e:
         console.print(f"[red]✗ Monitoring failed:[/red] {e}")
         logger.error(f"Monitor failed: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command(name="dashboard")
+def dashboard_command():
+    """Launch real-time TUI dashboard for monitoring agents.
+
+    Displays a terminal UI with:
+    - Agent status and current tasks
+    - Tasks overview table
+    - Communication log stream
+    """
+    init_logger()
+
+    work_dir = get_work_directory()
+
+    # Check if initialized
+    if not work_dir.exists():
+        console.print("[yellow]Not initialized. Run 'hephaestus init' first.[/yellow]")
+        sys.exit(1)
+
+    try:
+        # Load configuration
+        config_path = work_dir / "config.yaml"
+        config_manager = ConfigManager(config_path)
+        config = config_manager.load()
+
+        # Check if session exists
+        session_manager = SessionManager(config, work_dir)
+        if not session_manager.session_exists():
+            console.print(
+                Panel(
+                    f"[yellow]Warning: No active session found[/yellow]\n\n"
+                    "The dashboard will show limited information.\n"
+                    "Start the session with: [bold]hephaestus attach --create[/bold]",
+                    title="Session Not Running",
+                    border_style="yellow",
+                )
+            )
+
+        # Run the dashboard
+        console.print("[cyan]Starting Hephaestus Dashboard...[/cyan]")
+        run_dashboard(config, work_dir)
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Dashboard closed[/yellow]")
+    except Exception as e:
+        console.print(f"[red]✗ Dashboard failed:[/red] {e}")
+        logger.error(f"Dashboard failed: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command(name="logs")
+@click.option(
+    "--agent",
+    "-a",
+    multiple=True,
+    help="Agent name(s) to show logs for (master, worker-1, etc.)",
+)
+@click.option(
+    "--follow",
+    "-f",
+    is_flag=True,
+    help="Follow log output in real-time (like tail -f)",
+)
+@click.option(
+    "--lines",
+    "-n",
+    default=50,
+    type=int,
+    help="Number of lines to show (default: 50)",
+)
+@click.option(
+    "--all",
+    is_flag=True,
+    help="Show logs from all agents",
+)
+@click.option(
+    "--list",
+    "-l",
+    "list_logs",
+    is_flag=True,
+    help="List available log files",
+)
+def logs_command(agent: tuple, follow: bool, lines: int, all: bool, list_logs: bool):
+    """View and stream agent logs.
+
+    Examples:
+        hephaestus logs --list                    # List available logs
+        hephaestus logs -a master                 # Show master log
+        hephaestus logs -a master -f              # Follow master log
+        hephaestus logs --all -f                  # Follow all agent logs
+        hephaestus logs -a worker-1 -a worker-2   # Show multiple workers
+    """
+    init_logger()
+
+    work_dir = get_work_directory()
+
+    # Check if initialized
+    if not work_dir.exists():
+        console.print("[yellow]Not initialized. Run 'hephaestus init' first.[/yellow]")
+        sys.exit(1)
+
+    try:
+        log_streamer = LogStreamer(work_dir)
+
+        if list_logs:
+            # Show summary of available logs
+            log_streamer.show_log_summary()
+        elif follow:
+            # Stream logs in real-time
+            agent_names = list(agent) if agent else None
+            if all:
+                agent_names = None
+            log_streamer.stream_logs(agent_names=agent_names, follow=True)
+        elif agent:
+            # Show tail of specific agent logs
+            for agent_name in agent:
+                log_streamer.tail_logs(agent_name, lines=lines)
+                if len(agent) > 1:
+                    console.print()  # Blank line between multiple logs
+        else:
+            # Default: show summary
+            log_streamer.show_log_summary()
+            console.print("\n[cyan]Tip:[/cyan] Use --help to see more options")
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Log viewing stopped[/yellow]")
+    except Exception as e:
+        console.print(f"[red]✗ Log viewing failed:[/red] {e}")
+        logger.error(f"Logs command failed: {e}", exc_info=True)
         sys.exit(1)
 
 

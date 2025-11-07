@@ -12,6 +12,9 @@ Hephaestus-CLIは、tmuxを活用して複数のClaude Codeエージェントを
 
 - **Master-Workerアーキテクチャ**: 1つのMasterエージェントが複数のWorkerエージェントを統括
 - **Tmux統合**: 分割ペインで複数のエージェントを視覚的に管理
+- **リアルタイムダッシュボード**: TUIでエージェントのステータスとタスクをリアルタイム監視 🆕
+- **ログストリーミング**: エージェントのログをリアルタイムで表示・追跡 🆕
+- **厳格なペルソナ管理**: 起動時に役割を強制注入してエージェントの役割を明確化 🆕
 - **タスク管理**: タスクの自動分配と進捗追跡
 - **ヘルスモニタリング**: エージェントの自動ヘルスチェックとエラー回復
 - **ファイルベース通信**: Markdownベースのエージェント間メッセージング
@@ -208,6 +211,69 @@ hephaestus kill --force
 例:
 ```bash
 hephaestus status
+```
+
+### `hephaestus dashboard`
+
+エージェントをモニタリングするためのリアルタイムTUIダッシュボードを起動します。
+
+表示内容:
+- エージェントのステータスと現在のタスク
+- タスク概要テーブル
+- 通信ログストリーム
+
+例:
+```bash
+hephaestus dashboard
+```
+
+キーバインド:
+- `q`: ダッシュボードを終了
+- `r`: 手動で更新
+
+### `hephaestus logs`
+
+エージェントのログを表示・ストリーミングします。
+
+オプション:
+- `-a, --agent <name>`: 特定のエージェントのログを表示（例: master, worker-1）
+- `-f, --follow`: リアルタイムでログを追跡（tail -fと同様）
+- `-n, --lines N`: 表示する行数（デフォルト: 50）
+- `--all`: すべてのエージェントのログを表示
+- `-l, --list`: 利用可能なログファイルの一覧を表示
+
+例:
+```bash
+# ログ一覧を表示
+hephaestus logs --list
+
+# Masterエージェントのログを表示
+hephaestus logs -a master
+
+# Masterエージェントのログをリアルタイムで追跡
+hephaestus logs -a master -f
+
+# すべてのエージェントのログをリアルタイムで追跡
+hephaestus logs --all -f
+
+# 複数のWorkerのログを表示
+hephaestus logs -a worker-1 -a worker-2
+
+# 最後の100行を表示
+hephaestus logs -a master -n 100
+```
+
+### `hephaestus monitor`
+
+タスク配布を監視し、自動的にWorkerに通知します。
+
+オプション:
+- `-i, --interval N`: タスクチェック間隔（秒）（デフォルト: 5）
+- `-m, --max-iterations N`: 最大監視回数（デフォルト: 120）
+
+例:
+```bash
+hephaestus monitor --interval 10
 ```
 
 ## 使用例

@@ -166,6 +166,77 @@ class SessionManager:
 
         logger.info(f"Started {agent_name} in pane {pane.id}")
 
+        # Inject persona after a brief delay to allow claude to start
+        import time
+        time.sleep(3)  # Wait for claude to initialize
+        self._inject_persona(pane, agent_type, agent_name)
+
+    def _inject_persona(self, pane: libtmux.Pane, agent_type: str, agent_name: str) -> None:
+        """Inject persona configuration into agent on startup.
+
+        Args:
+            pane: Tmux pane object
+            agent_type: Type of agent ('master' or 'worker')
+            agent_name: Display name of the agent
+        """
+        try:
+            # Load persona from CLAUDE.md
+            if agent_type == "master":
+                persona_file = self.work_dir / ".claude" / "master" / "CLAUDE.md"
+            else:
+                persona_file = self.work_dir / ".claude" / "worker" / "CLAUDE.md"
+
+            if not persona_file.exists():
+                logger.warning(f"Persona file not found: {persona_file}")
+                return
+
+            # Read persona content
+            with open(persona_file, 'r', encoding='utf-8') as f:
+                persona_content = f.read()
+
+            # Create initialization prompt
+            init_prompt = f"""You are now initializing as {agent_name} in the Hephaestus multi-agent system.
+
+【CRITICAL ROLE ASSIGNMENT】
+Your role is strictly defined. You MUST adhere to this role at all times.
+Deviating from this role is NOT permitted.
+
+{persona_content}
+
+【CONFIRMATION】
+Please confirm your role by responding: "✓ {agent_name} initialized and ready. Role acknowledged."
+
+After confirmation, you will begin receiving tasks according to your role."""
+
+            # Send the initialization prompt
+            # First, clear any existing input
+            pane.send_keys("C-c")
+            import time
+            time.sleep(0.5)
+
+            # Split the prompt into smaller chunks to avoid tmux limitations
+            lines = init_prompt.split('\n')
+            chunk_size = 5  # Send 5 lines at a time
+
+            for i in range(0, len(lines), chunk_size):
+                chunk = '\n'.join(lines[i:i+chunk_size])
+                # Escape special characters for tmux
+                escaped_chunk = chunk.replace('"', '\\"').replace('$', '\\$')
+                pane.send_keys(f'echo "{escaped_chunk}"')
+                time.sleep(0.2)
+
+            # Send the actual prompt to claude by typing it
+            # Use a simpler version that's easier to send
+            simple_prompt = f"Initialize as {agent_name}. Acknowledge your role as defined in CLAUDE.md and confirm you are ready to operate according to your role description."
+            pane.send_keys(simple_prompt)
+            time.sleep(0.5)
+            pane.send_keys("Enter")
+
+            logger.info(f"Injected persona for {agent_name}")
+
+        except Exception as e:
+            logger.error(f"Failed to inject persona for {agent_name}: {e}", exc_info=True)
+
     def attach(self) -> None:
         """Attach to the existing tmux session.
 
