@@ -1,7 +1,5 @@
 # Hephaestus-CLI
 
-> 🏗️ 開発中です
-
 複数のLLMエージェント（Master + Workers）を管理し、複雑なタスクを協調実行するためのtmuxベースのマルチエージェントCLIツールです。
 
 > 📖 [English README](README_EN.md) | 📚 [詳細ドキュメント](doc/commands/)
@@ -17,8 +15,8 @@
 ## 前提条件
 
 - Python 3.10以上
-- tmux（システムにインストール済み）
-- claude CLI（インストール・設定済み）
+- tmux
+- claude CLI
 - Linuxオペレーティングシステム
 
 ## インストール
