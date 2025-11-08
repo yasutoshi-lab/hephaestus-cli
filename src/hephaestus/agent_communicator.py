@@ -39,7 +39,26 @@ class AgentCommunicator:
             Tmux pane target string (e.g., "hephaestus:0.0") or None if not found
         """
         try:
-            # List all panes with their titles
+            # Map agent names to expected pane indices
+            # Master is always pane 0, workers are panes 1, 2, 3, etc.
+            agent_to_pane = {
+                "master": 0
+            }
+
+            # Parse worker names like "worker-1", "worker-2", etc.
+            if agent_name.startswith("worker-"):
+                try:
+                    worker_num = int(agent_name.split("-")[1])
+                    agent_to_pane[agent_name] = worker_num
+                except (IndexError, ValueError):
+                    pass
+
+            # If we have a direct mapping, use it
+            if agent_name in agent_to_pane:
+                pane_index = agent_to_pane[agent_name]
+                return f"{self.session_name}:0.{pane_index}"
+
+            # Fallback: Try to find by pane title (old method)
             result = subprocess.run(
                 ["tmux", "list-panes", "-t", self.session_name, "-F", "#{pane_index}:#{pane_title}"],
                 capture_output=True,
