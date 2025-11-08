@@ -13,6 +13,7 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 - **Strict Persona Management**: Force-inject agent roles at startup
 - **Tmux Integration**: Visual management of multiple agents in split panes
 - **Automatic Task Distribution**: Markdown-based file communication for task assignment
+- **Enforced Communication Protocol**: Reliable inter-agent communication using `hephaestus send`
 
 ## Prerequisites
 
@@ -112,6 +113,7 @@ tmux:
 | `hephaestus init` | Initialize environment | [Details](doc/commands/init_en.md) |
 | `hephaestus attach` | Attach/create tmux session | [Details](doc/commands/attach_en.md) |
 | `hephaestus status` | Show current status | [Details](doc/commands/status_en.md) |
+| `hephaestus send` | Send message to agents | [Details](doc/commands/send_en.md) |
 | `hephaestus dashboard` | Real-time TUI dashboard | [Details](doc/commands/dashboard_en.md) |
 | `hephaestus logs` | Display/stream logs | [Details](doc/commands/logs_en.md) |
 | `hephaestus monitor` | Monitor task distribution | [Details](doc/commands/monitor_en.md) |
@@ -119,7 +121,9 @@ tmux:
 
 See each command's documentation for detailed usage.
 
-## Usage Example
+## Usage Examples
+
+### Basic Usage
 
 ```bash
 # Code Refactoring Project
@@ -131,6 +135,26 @@ hephaestus attach --create
 ```
 
 Master automatically splits tasks and assigns them to Workers for parallel processing.
+
+### Manual Inter-Agent Communication
+
+```bash
+# List available agents
+hephaestus send --list
+
+# Send message to specific Worker
+hephaestus send worker-1 "Start analyzing the src/ directory"
+
+# Report progress to Master (from within Worker)
+hephaestus send master "Task completed. Please review the results"
+
+# Check communication logs
+cat hephaestus-work/logs/communication.log
+```
+
+**Note**: Agent personas enforce the use of `hephaestus send`:
+- **Master**: Must use `hephaestus send worker-{N}` when assigning tasks
+- **Worker**: Must use `hephaestus send master` when reporting progress
 
 ## Troubleshooting
 

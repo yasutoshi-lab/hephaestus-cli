@@ -11,6 +11,7 @@
 - **厳格なペルソナ管理**: 起動時にエージェントの役割を強制注入
 - **Tmux統合**: 分割ペインで複数エージェントを視覚的に管理
 - **自動タスク分配**: Markdownベースのファイル通信でタスクを自動配布
+- **強制通信プロトコル**: `hephaestus send` を使用した確実なエージェント間通信
 
 ## 前提条件
 
@@ -110,6 +111,7 @@ tmux:
 | `hephaestus init` | 環境を初期化 | [詳細](doc/commands/init_ja.md) |
 | `hephaestus attach` | tmuxセッションにアタッチ/作成 | [詳細](doc/commands/attach_ja.md) |
 | `hephaestus status` | 現在のステータスを表示 | [詳細](doc/commands/status_ja.md) |
+| `hephaestus send` | エージェントにメッセージを送信 | [詳細](doc/commands/send_ja.md) |
 | `hephaestus dashboard` | リアルタイムTUIダッシュボード | [詳細](doc/commands/dashboard_ja.md) |
 | `hephaestus logs` | ログの表示・ストリーミング | [詳細](doc/commands/logs_ja.md) |
 | `hephaestus monitor` | タスク配布の監視 | [詳細](doc/commands/monitor_ja.md) |
@@ -118,6 +120,8 @@ tmux:
 詳しい使い方は各コマンドのドキュメントを参照してください。
 
 ## 使用例
+
+### 基本的な使用
 
 ```bash
 # コードリファクタリングプロジェクト
@@ -129,6 +133,26 @@ hephaestus attach --create
 ```
 
 Masterが自動的にタスクを分割し、Workerに割り当てて並列処理します。
+
+### エージェント間の手動通信
+
+```bash
+# エージェント一覧を確認
+hephaestus send --list
+
+# 特定のWorkerにメッセージを送信
+hephaestus send worker-1 "src/ディレクトリの解析を開始してください"
+
+# Masterに進捗を報告（Worker内から）
+hephaestus send master "タスク完了しました。結果を確認してください"
+
+# 通信ログを確認
+cat hephaestus-work/logs/communication.log
+```
+
+**注意**: エージェントのペルソナは `hephaestus send` の使用を強制します：
+- **Master**: タスク配分時に必ず `hephaestus send worker-{N}` でWorkerに通知
+- **Worker**: 進捗報告時に必ず `hephaestus send master` でMasterに報告
 
 ## トラブルシューティング
 
