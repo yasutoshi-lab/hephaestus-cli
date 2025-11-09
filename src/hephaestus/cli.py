@@ -1,4 +1,4 @@
-"""CLI entry point for Hephaestus-CLI.
+"""CLI entry point for Hephaestus.
 
 This module implements the command-line interface using Click.
 """
@@ -33,9 +33,9 @@ def init_logger():
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@click.version_option(version="0.1.0", prog_name="hephaestus-cli")
+@click.version_option(version="0.1.0", prog_name="Hephaestus")
 def main(ctx):
-    """Hephaestus-CLI: A tmux-based multi-agent CLI tool.
+    """Hephaestus: A tmux-based multi-agent CLI tool.
 
     Manages multiple LLM agents (Master + Workers) to execute complex tasks collaboratively.
     """

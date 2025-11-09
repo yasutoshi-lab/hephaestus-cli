@@ -1,4 +1,4 @@
-# Hephaestus-CLI
+# Hephaestus
 
 複数のLLMエージェント（Master + Workers）を管理し、複雑なタスクを協調実行するためのtmuxベースのマルチエージェントCLIツールです。
 
@@ -29,29 +29,29 @@
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # リポジトリのクローン
-git clone https://github.com/your-org/hephaestus-cli.git
-cd hephaestus-cli
+git clone https://github.com/your-org/Hephaestus.git
+cd Hephaestus
 
 # パッケージのビルド
 python3 -m build
 
 # uvでインストール
-uv tool install dist/hephaestus_cli-0.1.0-*.whl
+uv tool install dist/hephaestus-0.1.0-*.whl
 ```
 
 ### pipを使用
 
 ```bash
 # クローンとビルド
-git clone https://github.com/your-org/hephaestus-cli.git
-cd hephaestus-cli
+git clone https://github.com/your-org/Hephaestus.git
+cd Hephaestus
 
 # 開発モードでインストール
 pip install -e .
 
 # またはビルドしてインストール
 python3 -m build
-pip install dist/hephaestus_cli-0.1.0-*.whl
+pip install dist/hephaestus-0.1.0-*.whl
 ```
 
 ## クイックスタート

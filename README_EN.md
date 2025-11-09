@@ -1,4 +1,4 @@
-# Hephaestus-CLI
+# Hephaestus
 
 > 🏗️ Under Development
 
@@ -31,29 +31,29 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone the repository
-git clone https://github.com/your-org/hephaestus-cli.git
-cd hephaestus-cli
+git clone https://github.com/your-org/Hephaestus.git
+cd Hephaestus
 
 # Build the package
 python3 -m build
 
 # Install with uv
-uv tool install dist/hephaestus_cli-0.1.0-*.whl
+uv tool install dist/hephaestus-0.1.0-*.whl
 ```
 
 ### Using pip
 
 ```bash
 # Clone and build
-git clone https://github.com/your-org/hephaestus-cli.git
-cd hephaestus-cli
+git clone https://github.com/your-org/Hephaestus.git
+cd Hephaestus
 
 # Install in development mode
 pip install -e .
 
 # Or build and install
 python3 -m build
-pip install dist/hephaestus_cli-0.1.0-*.whl
+pip install dist/hephaestus-0.1.0-*.whl
 ```
 
 ## Quick Start

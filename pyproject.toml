@@ -1,5 +1,5 @@
 [project]
-name = "hephaestus-cli"
+name = "Hephaestus"
 version = "0.1.0"
 description = "A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Workers) to execute complex tasks collaboratively"
 readme = "README.md"
@@ -14,7 +14,7 @@ dependencies = [
     "textual>=0.47.0",
 ]
 authors = [
-    {name = "Hephaestus-CLI Development Team"}
+    {name = "Hephaestus Developer"}
 ]
 license = {text = "MIT"}
 keywords = ["cli", "tmux", "multi-agent", "llm", "claude-code"]
