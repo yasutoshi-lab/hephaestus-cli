@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 from typing import Optional, List
 import libtmux
+from libtmux.pane import PaneDirection
 
 from .config import Config
 from .agent_controller import AgentController
@@ -90,11 +91,23 @@ class SessionManager:
             panes.append(master_pane)
 
             # Create additional panes for workers
+            # Use calculated percentages to ensure equal distribution of space
             for i in range(self.config.workers.count):
-                pane = window.split_window(attach=False)
+                # Calculate percentage for each split to ensure equal pane sizes
+                # Each time we split, we want the new pane to be 1/(remaining_panes) of current space
+                remaining_panes = self.config.workers.count - i
+                percentage = int(100 / (remaining_panes + 1))
+
+                # Split the master pane with calculated percentage
+                # Using split() with PaneDirection.Right (vertical split, side-by-side)
+                pane = panes[0].split(
+                    direction=PaneDirection.Right,
+                    attach=False,
+                    size=f"{percentage}%"
+                )
                 panes.append(pane)
 
-            # Apply layout
+            # Apply layout (this will rearrange panes according to the configured layout)
             window.select_layout(self.config.tmux.layout)
 
             # Start agents in each pane
