@@ -200,18 +200,20 @@ class CommunicationManager:
         messages = []
 
         try:
-            # Determine source directory
+            # Determine message file locations
+            pattern = f"*_{message_type}.md" if message_type else "*.md"
+
             if agent_id == "master":
-                source_dir = self.worker_to_master_dir
+                if not self.worker_to_master_dir.exists():
+                    return messages
+                filepaths = sorted(self.worker_to_master_dir.rglob(pattern))
             else:
                 source_dir = self.master_to_worker_dir / agent_id
+                if not source_dir.exists():
+                    return messages
+                filepaths = sorted(source_dir.glob(pattern))
 
-            if not source_dir.exists():
-                return messages
-
-            # Read all message files
-            pattern = f"*_{message_type}.md" if message_type else "*.md"
-            for filepath in sorted(source_dir.glob(pattern)):
+            for filepath in filepaths:
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:
                         markdown = f.read()
@@ -257,7 +259,7 @@ class CommunicationManager:
                     continue
 
                 # Find and delete message file
-                for filepath in search_dir.glob(f"{message_id}_*.md"):
+                for filepath in search_dir.rglob(f"{message_id}_*.md"):
                     filepath.unlink()
                     logger.debug(f"Deleted message {message_id} for {agent_id}")
                     return True
@@ -279,10 +281,11 @@ class CommunicationManager:
         """
         try:
             if agent_id == "master":
-                source_dir = self.worker_to_master_dir
-            else:
-                source_dir = self.master_to_worker_dir / agent_id
+                if not self.worker_to_master_dir.exists():
+                    return 0
+                return len(list(self.worker_to_master_dir.rglob("*.md")))
 
+            source_dir = self.master_to_worker_dir / agent_id
             if not source_dir.exists():
                 return 0
 
