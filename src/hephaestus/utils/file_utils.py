@@ -1,4 +1,4 @@
-"""File system utilities for Hephaestus-CLI.
+"""File system utilities for Hephaestus.
 
 This module provides functions for directory structure creation,
 file operations, and template management.

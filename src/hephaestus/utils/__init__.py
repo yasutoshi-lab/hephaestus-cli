@@ -1,4 +1,4 @@
-"""Utility modules for Hephaestus-CLI."""
+"""Utility modules for Hephaestus."""
 
 from .logger import setup_logger, get_logger
 from .file_utils import (

@@ -1,4 +1,4 @@
-"""Logging utility for Hephaestus-CLI.
+"""Logging utility for Hephaestus.
 
 This module provides structured logging functionality with support for
 file and console output, log rotation, and sensitive information masking.
