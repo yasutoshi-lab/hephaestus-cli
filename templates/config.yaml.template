@@ -2,6 +2,7 @@
 # Version: 1.0
 
 version: 1.0
+agent_type: "claude"  # Options: claude, gemini, codex
 
 agents:
   master:

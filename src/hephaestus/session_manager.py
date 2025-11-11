@@ -12,7 +12,7 @@ from typing import Optional, List
 import libtmux
 from libtmux.pane import PaneDirection
 
-from .config import Config
+from .config import Config, AGENT_README_FILES
 from .agent_controller import AgentController
 
 logger = logging.getLogger(__name__)
@@ -193,11 +193,14 @@ class SessionManager:
             agent_name: Display name of the agent
         """
         try:
-            # Load persona from CLAUDE.md
+            # Get README filename based on agent type
+            readme_filename = AGENT_README_FILES.get(self.config.agent_type, "CLAUDE.md")
+
+            # Load persona from agent-specific README file
             if agent_type == "master":
-                persona_file = self.work_dir / ".claude" / "master" / "CLAUDE.md"
+                persona_file = self.work_dir / ".claude" / "master" / readme_filename
             else:
-                persona_file = self.work_dir / ".claude" / "worker" / "CLAUDE.md"
+                persona_file = self.work_dir / ".claude" / "worker" / readme_filename
 
             if not persona_file.exists():
                 logger.warning(f"Persona file not found: {persona_file}")
@@ -238,9 +241,9 @@ After confirmation, you will begin receiving tasks according to your role."""
                 pane.send_keys(f'echo "{escaped_chunk}"')
                 time.sleep(0.2)
 
-            # Send the actual prompt to claude by typing it
+            # Send the actual prompt to agent by typing it
             # Use a simpler version that's easier to send
-            simple_prompt = f"Initialize as {agent_name}. Acknowledge your role as defined in CLAUDE.md and confirm you are ready to operate according to your role description."
+            simple_prompt = f"Initialize as {agent_name}. Acknowledge your role as defined in {readme_filename} and confirm you are ready to operate according to your role description."
             pane.send_keys(simple_prompt)
             time.sleep(0.5)
             pane.send_keys("Enter")

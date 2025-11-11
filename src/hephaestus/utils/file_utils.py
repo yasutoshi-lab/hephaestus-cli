@@ -167,14 +167,23 @@ def get_directory_size(directory: Path) -> int:
     return total_size
 
 
-def create_agent_config_files(work_dir: Path) -> None:
-    """Create CLAUDE.md configuration files for master and worker agents.
+def create_agent_config_files(work_dir: Path, agent_type: str = "claude") -> None:
+    """Create agent configuration files (CLAUDE.md, GEMINI.md, or AGENT.md) for master and worker agents.
 
-    Creates hierarchical CLAUDE.md files to configure agent personas and behaviors.
+    Creates hierarchical configuration files to configure agent personas and behaviors.
 
     Args:
         work_dir: Path to .hephaestus-work directory
+        agent_type: Type of agent (claude, gemini, or codex)
     """
+    # Agent type to README filename mapping
+    readme_files = {
+        "claude": "CLAUDE.md",
+        "gemini": "GEMINI.md",
+        "codex": "AGENT.md",
+    }
+    readme_filename = readme_files.get(agent_type, "CLAUDE.md")
+
     claude_dir = work_dir / ".claude"
     master_dir = claude_dir / "master"
     worker_dir = claude_dir / "worker"
@@ -567,8 +576,8 @@ You are a focused, reliable member of the team. Execute your assigned tasks with
 """
 
     # Write configuration files
-    (claude_dir / "CLAUDE.md").write_text(common_config, encoding="utf-8")
-    (master_dir / "CLAUDE.md").write_text(master_config, encoding="utf-8")
-    (worker_dir / "CLAUDE.md").write_text(worker_config, encoding="utf-8")
+    (claude_dir / readme_filename).write_text(common_config, encoding="utf-8")
+    (master_dir / readme_filename).write_text(master_config, encoding="utf-8")
+    (worker_dir / readme_filename).write_text(worker_config, encoding="utf-8")
 
-    logger.info(f"Created agent configuration files in {claude_dir}")
+    logger.info(f"Created {readme_filename} agent configuration files in {claude_dir}")

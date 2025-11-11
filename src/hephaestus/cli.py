@@ -57,7 +57,14 @@ def main(ctx):
     is_flag=True,
     help="Force initialization even if .hephaestus-work exists",
 )
-def init_command(workers: int, force: bool):
+@click.option(
+    "--agent-type",
+    "-a",
+    type=click.Choice(["claude", "gemini", "codex"], case_sensitive=False),
+    default="claude",
+    help="Type of AI agent to use (default: claude)",
+)
+def init_command(workers: int, force: bool, agent_type: str):
     """Initialize .hephaestus-work directory in current location.
 
     Creates the necessary directory structure, configuration file,
@@ -85,9 +92,9 @@ def init_command(workers: int, force: bool):
         create_directory_structure()
 
         # Create default config
-        console.print("[cyan]Creating configuration file...[/cyan]")
+        console.print(f"[cyan]Creating configuration file for {agent_type} agent...[/cyan]")
         config_path = work_dir / "config.yaml"
-        config = create_default_config(config_path)
+        config = create_default_config(config_path, agent_type=agent_type)
 
         # Update worker count if specified
         if workers != 3:
@@ -96,8 +103,9 @@ def init_command(workers: int, force: bool):
             manager.save(config)
 
         # Create agent configuration files
-        console.print("[cyan]Creating agent configuration files (CLAUDE.md)...[/cyan]")
-        create_agent_config_files(work_dir)
+        readme_file = {"claude": "CLAUDE.md", "gemini": "GEMINI.md", "codex": "AGENT.md"}[agent_type]
+        console.print(f"[cyan]Creating agent configuration files ({readme_file})...[/cyan]")
+        create_agent_config_files(work_dir, agent_type=agent_type)
 
         # Success message
         table = Table(title="Initialization Complete", show_header=False)
@@ -106,6 +114,7 @@ def init_command(workers: int, force: bool):
 
         table.add_row("Work Directory", str(work_dir))
         table.add_row("Config File", str(config_path))
+        table.add_row("Agent Type", agent_type)
         table.add_row("Master Agents", "1")
         table.add_row("Worker Agents", str(workers))
         table.add_row("Tmux Session", config.tmux.session_name)

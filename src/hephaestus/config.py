@@ -12,6 +12,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Agent type command mappings
+AGENT_COMMANDS = {
+    "claude": "claude --dangerously-skip-permissions",
+    "gemini": "gemini --yolo",
+    "codex": "codex --full-auto",
+}
+
+# Agent type README file mappings
+AGENT_README_FILES = {
+    "claude": "CLAUDE.md",
+    "gemini": "GEMINI.md",
+    "codex": "AGENT.md",
+}
+
 
 @dataclass
 class AgentConfig:
@@ -69,6 +83,7 @@ class Config:
     """Main configuration class for Hephaestus."""
 
     version: str = "1.0"
+    agent_type: str = "claude"  # Options: claude, gemini, codex
     master: AgentConfig = field(default_factory=AgentConfig)
     workers: WorkersConfig = field(default_factory=WorkersConfig)
     monitoring: MonitoringConfig = field(default_factory=MonitoringConfig)
@@ -92,6 +107,7 @@ class Config:
 
         return cls(
             version=data.get("version", "1.0"),
+            agent_type=data.get("agent_type", "claude"),
             master=AgentConfig(**master_data),
             workers=WorkersConfig(**workers_data),
             monitoring=MonitoringConfig(**data.get("monitoring", {})),
@@ -108,6 +124,7 @@ class Config:
         """
         return {
             "version": self.version,
+            "agent_type": self.agent_type,
             "agents": {
                 "master": {
                     "enabled": self.master.enabled,
@@ -208,17 +225,26 @@ class ConfigManager:
         return self.load()
 
 
-def create_default_config(config_path: Path) -> Config:
+def create_default_config(config_path: Path, agent_type: str = "claude") -> Config:
     """Create a default configuration file.
 
     Args:
         config_path: Path where config.yaml should be created
+        agent_type: Type of agent to use (claude, gemini, or codex)
 
     Returns:
         Default Config instance
     """
-    config = Config()
+    # Get the command for the specified agent type
+    command = AGENT_COMMANDS.get(agent_type, AGENT_COMMANDS["claude"])
+
+    # Create config with agent-specific command
+    config = Config(
+        agent_type=agent_type,
+        master=AgentConfig(command=command),
+        workers=WorkersConfig(command=command),
+    )
     manager = ConfigManager(config_path)
     manager.save(config)
-    logger.info(f"Created default configuration at {config_path}")
+    logger.info(f"Created default configuration at {config_path} for agent type: {agent_type}")
     return config
