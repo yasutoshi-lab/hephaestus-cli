@@ -26,6 +26,12 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
   - ChatGPT Codex (with --full-auto option support)
 - Linux operating system
 
+## Use Cases
+
+- Research
+- Small- to Medium-Scale System Development
+- Refactoring
+
 ## Installation
 
 ### Using uv (Recommended)
