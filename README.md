@@ -16,11 +16,11 @@
 
 ## UI
 
-**イメージサンプル**
-<img src"./media/ui-sample.png", width=600>
+**イメージサンプル**  
+<img src="./media/ui-sample.png", width=600>
 
-**動作サンプル**
-<img src"./media/working-sample.gif", width=600>
+**動作サンプル**  
+<img src="./media/working-sample.gif", width=600>
 
 ## 前提条件
 
