@@ -9,6 +9,7 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 ## Key Features
 
 - **Master-Worker Architecture**: One Master agent coordinates multiple Worker agents
+- **Multiple AI Agent Support**: Supports Claude Code, Gemini CLI, and ChatGPT Codex
 - **Real-Time Monitoring**: TUI dashboard and log streaming for visibility
 - **Strict Persona Management**: Force-inject agent roles at startup
 - **Tmux Integration**: Visual management of multiple agents in split panes
@@ -19,7 +20,10 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 
 - Python 3.10 or higher
 - tmux
-- claude code
+- One of the following AI agents:
+  - [Claude Code](https://github.com/anthropics/claude-code)
+  - [Gemini CLI](https://github.com/google/gemini-cli) (with --yolo option support)
+  - ChatGPT Codex (with --full-auto option support)
 - Linux operating system
 
 ## Installation
@@ -59,9 +63,14 @@ pip install dist/hephaestus-0.1.0-*.whl
 ## Quick Start
 
 ```bash
-# 1. Initialize
+# 1. Initialize (uses Claude Code by default)
 cd /path/to/your/project
 hephaestus init
+
+# Or specify a specific AI agent
+hephaestus init --agent-type gemini    # Use Gemini CLI
+hephaestus init --agent-type codex     # Use ChatGPT Codex
+hephaestus init --agent-type claude    # Use Claude Code (explicit)
 
 # 2. Start session
 hephaestus attach --create
@@ -85,15 +94,16 @@ Edit `.hephaestus-work/config.yaml` to customize:
 
 ```yaml
 version: 1.0
+agent_type: "claude"  # claude, gemini, codex
 
 agents:
   master:
     enabled: true
-    command: "claude"
+    command: "claude --dangerously-skip-permissions"  # Auto-configured by agent type
     args: []
   workers:
     count: 3  # Change number of workers
-    command: "claude"
+    command: "claude --dangerously-skip-permissions"
     args: []
 
 monitoring:
@@ -105,6 +115,11 @@ tmux:
   session_name: "hephaestus"
   layout: "tiled"  # even-horizontal, even-vertical, main-horizontal, main-vertical, tiled
 ```
+
+**Commands by Agent Type:**
+- `claude`: `claude --dangerously-skip-permissions`
+- `gemini`: `gemini --yolo`
+- `codex`: `codex --full-auto`
 
 ## Commands
 
@@ -126,12 +141,20 @@ See each command's documentation for detailed usage.
 ### Basic Usage
 
 ```bash
-# Code Refactoring Project
-hephaestus init --workers 4
+# Code Refactoring Project (using Claude Code)
+hephaestus init --agent-type claude --workers 4
 hephaestus attach --create
 # In Master pane:
 # "Refactor the entire codebase to use dependency injection.
 #  Split the work across available workers."
+```
+
+```bash
+# Data Analysis Project (using Gemini CLI)
+hephaestus init --agent-type gemini --workers 3
+hephaestus attach --create
+# In Master pane:
+# "Analyze multiple datasets and create an integrated report."
 ```
 
 Master automatically splits tasks and assigns them to Workers for parallel processing.

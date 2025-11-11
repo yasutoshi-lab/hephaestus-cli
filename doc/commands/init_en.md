@@ -15,6 +15,7 @@ hephaestus init [OPTIONS]
 | Option | Short | Default | Description |
 |--------|-------|---------|-------------|
 | `--workers` | `-w` | 3 | Specify the number of worker agents |
+| `--agent-type` | `-a` | claude | Type of AI agent to use (claude, gemini, codex) |
 | `--force` | `-f` | - | Force reinitialization even if .hephaestus-work exists |
 | `--help` | - | - | Show help message |
 
@@ -26,11 +27,13 @@ When you run this command, the following operations are performed:
    ```
    .hephaestus-work/
    ├── .claude/              # Agent configuration
-   │   ├── CLAUDE.md         # Common configuration
+   │   ├── CLAUDE.md         # Common configuration (for claude)
+   │   ├── GEMINI.md         # Common configuration (for gemini)
+   │   ├── AGENT.md          # Common configuration (for codex)
    │   ├── master/           # Master configuration
-   │   │   └── CLAUDE.md
+   │   │   └── [Agent-specific README file]
    │   └── worker/           # Worker configuration
-   │       └── CLAUDE.md
+   │       └── [Agent-specific README file]
    ├── config.yaml           # System configuration
    ├── cache/                # Cache
    │   ├── agent_states/
@@ -48,10 +51,11 @@ When you run this command, the following operations are performed:
    ```
 
 2. **Configuration File Generation**
-   - `config.yaml`: System-wide configuration
-   - `.claude/CLAUDE.md`: Common agent configuration
-   - `.claude/master/CLAUDE.md`: Master agent persona
-   - `.claude/worker/CLAUDE.md`: Worker agent persona
+   - `config.yaml`: System-wide configuration (including agent_type field)
+   - Agent-type-specific README files:
+     - Claude: `.claude/CLAUDE.md`, `.claude/master/CLAUDE.md`, `.claude/worker/CLAUDE.md`
+     - Gemini: `.claude/GEMINI.md`, `.claude/master/GEMINI.md`, `.claude/worker/GEMINI.md`
+     - Codex: `.claude/AGENT.md`, `.claude/master/AGENT.md`, `.claude/worker/AGENT.md`
 
 3. **Initialization Confirmation**
    - Upon successful completion, information about created directories and files is displayed
@@ -64,7 +68,22 @@ When you run this command, the following operations are performed:
 hephaestus init
 ```
 
-Creates an environment with 3 worker agents by default.
+Creates an environment with 3 worker agents using Claude Code by default.
+
+### Initialize with Specific Agent Type
+
+```bash
+# Use Gemini CLI
+hephaestus init --agent-type gemini
+
+# Use ChatGPT Codex
+hephaestus init --agent-type codex
+
+# Use Claude Code (explicit)
+hephaestus init --agent-type claude
+```
+
+Commands and README files are automatically configured according to the agent type.
 
 ### Initialize with Specific Worker Count
 
@@ -73,6 +92,14 @@ hephaestus init --workers 5
 ```
 
 Creates an environment with 5 worker agents.
+
+### Initialize with Both Agent Type and Worker Count
+
+```bash
+hephaestus init --agent-type gemini --workers 4
+```
+
+Creates an environment using Gemini CLI with 4 worker agents.
 
 ### Force Reinitialization
 

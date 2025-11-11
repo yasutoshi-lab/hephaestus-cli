@@ -7,6 +7,7 @@
 ## 主な特徴
 
 - **Master-Workerアーキテクチャ**: 1つのMasterエージェントが複数のWorkerエージェントを統括
+- **複数のAIエージェント対応**: Claude Code, Gemini CLI, ChatGPT Codexをサポート
 - **リアルタイム監視**: TUIダッシュボードとログストリーミングで状態を可視化
 - **厳格なペルソナ管理**: 起動時にエージェントの役割を強制注入
 - **Tmux統合**: 分割ペインで複数エージェントを視覚的に管理
@@ -17,7 +18,10 @@
 
 - Python 3.10以上
 - tmux
-- claude code
+- 以下のいずれかのAIエージェント:
+  - [Claude Code](https://github.com/anthropics/claude-code)
+  - [Gemini CLI](https://github.com/google/gemini-cli) (--yoloオプション対応)
+  - ChatGPT Codex (--full-autoオプション対応)
 - Linuxオペレーティングシステム
 
 ## インストール
@@ -57,9 +61,14 @@ pip install dist/hephaestus-0.1.0-*.whl
 ## クイックスタート
 
 ```bash
-# 1. 初期化
+# 1. 初期化（デフォルトでClaude Codeを使用）
 cd /path/to/your/project
 hephaestus init
+
+# または特定のAIエージェントを指定
+hephaestus init --agent-type gemini    # Gemini CLIを使用
+hephaestus init --agent-type codex     # ChatGPT Codexを使用
+hephaestus init --agent-type claude    # Claude Code（明示的指定）
 
 # 2. セッション開始
 hephaestus attach --create
@@ -83,15 +92,16 @@ hephaestus kill
 
 ```yaml
 version: 1.0
+agent_type: "claude"  # claude, gemini, codex
 
 agents:
   master:
     enabled: true
-    command: "claude"
+    command: "claude --dangerously-skip-permissions"  # エージェントタイプにより自動設定
     args: []
   workers:
     count: 3  # Worker数を変更
-    command: "claude"
+    command: "claude --dangerously-skip-permissions"
     args: []
 
 monitoring:
@@ -103,6 +113,11 @@ tmux:
   session_name: "hephaestus"
   layout: "tiled"  # even-horizontal, even-vertical, main-horizontal, main-vertical, tiled
 ```
+
+**エージェントタイプ別のコマンド:**
+- `claude`: `claude --dangerously-skip-permissions`
+- `gemini`: `gemini --yolo`
+- `codex`: `codex --full-auto`
 
 ## コマンド
 
@@ -124,12 +139,20 @@ tmux:
 ### 基本的な使用
 
 ```bash
-# コードリファクタリングプロジェクト
-hephaestus init --workers 4
+# コードリファクタリングプロジェクト（Claude Codeを使用）
+hephaestus init --agent-type claude --workers 4
 hephaestus attach --create
 # Masterペインで:
 # "コードベース全体を依存性注入を使用するようにリファクタリングしてください。
 #  利用可能なworker間で作業を分割してください。"
+```
+
+```bash
+# データ分析プロジェクト（Gemini CLIを使用）
+hephaestus init --agent-type gemini --workers 3
+hephaestus attach --create
+# Masterペインで:
+# "複数のデータセットを分析し、統合レポートを作成してください。"
 ```
 
 Masterが自動的にタスクを分割し、Workerに割り当てて並列処理します。

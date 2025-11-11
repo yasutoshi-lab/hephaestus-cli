@@ -15,6 +15,7 @@ hephaestus init [OPTIONS]
 | オプション | 短縮形 | デフォルト | 説明 |
 |-----------|--------|-----------|------|
 | `--workers` | `-w` | 3 | Workerエージェントの数を指定 |
+| `--agent-type` | `-a` | claude | 使用するAIエージェントのタイプ（claude, gemini, codex） |
 | `--force` | `-f` | - | 既存の.hephaestus-workディレクトリがある場合でも強制的に再初期化 |
 | `--help` | - | - | ヘルプメッセージを表示 |
 
@@ -26,11 +27,13 @@ hephaestus init [OPTIONS]
    ```
    .hephaestus-work/
    ├── .claude/              # エージェント設定
-   │   ├── CLAUDE.md         # 共通設定
+   │   ├── CLAUDE.md         # 共通設定（claudeの場合）
+   │   ├── GEMINI.md         # 共通設定（geminiの場合）
+   │   ├── AGENT.md          # 共通設定（codexの場合）
    │   ├── master/           # Master設定
-   │   │   └── CLAUDE.md
+   │   │   └── [エージェント固有のREADMEファイル]
    │   └── worker/           # Worker設定
-   │       └── CLAUDE.md
+   │       └── [エージェント固有のREADMEファイル]
    ├── config.yaml           # システム設定
    ├── cache/                # キャッシュ
    │   ├── agent_states/
@@ -48,10 +51,11 @@ hephaestus init [OPTIONS]
    ```
 
 2. **設定ファイルの生成**
-   - `config.yaml`: システム全体の設定
-   - `.claude/CLAUDE.md`: 共通のエージェント設定
-   - `.claude/master/CLAUDE.md`: Masterエージェントのペルソナ
-   - `.claude/worker/CLAUDE.md`: Workerエージェントのペルソナ
+   - `config.yaml`: システム全体の設定（agent_typeフィールドを含む）
+   - エージェントタイプに応じたREADMEファイル:
+     - Claude: `.claude/CLAUDE.md`, `.claude/master/CLAUDE.md`, `.claude/worker/CLAUDE.md`
+     - Gemini: `.claude/GEMINI.md`, `.claude/master/GEMINI.md`, `.claude/worker/GEMINI.md`
+     - Codex: `.claude/AGENT.md`, `.claude/master/AGENT.md`, `.claude/worker/AGENT.md`
 
 3. **初期化の確認**
    - 正常に完了すると、作成されたディレクトリとファイルの情報が表示されます
@@ -64,7 +68,22 @@ hephaestus init [OPTIONS]
 hephaestus init
 ```
 
-デフォルトで3つのWorkerエージェントを含む環境が作成されます。
+デフォルトで3つのWorkerエージェント、Claude Codeを使用する環境が作成されます。
+
+### エージェントタイプを指定して初期化
+
+```bash
+# Gemini CLIを使用
+hephaestus init --agent-type gemini
+
+# ChatGPT Codexを使用
+hephaestus init --agent-type codex
+
+# Claude Code（明示的指定）
+hephaestus init --agent-type claude
+```
+
+各エージェントタイプに応じたコマンドとREADMEファイルが自動的に設定されます。
 
 ### Worker数を指定して初期化
 
@@ -73,6 +92,14 @@ hephaestus init --workers 5
 ```
 
 5つのWorkerエージェントを含む環境が作成されます。
+
+### エージェントタイプとWorker数を両方指定
+
+```bash
+hephaestus init --agent-type gemini --workers 4
+```
+
+Gemini CLIを使用し、4つのWorkerエージェントを含む環境が作成されます。
 
 ### 強制的に再初期化
 
