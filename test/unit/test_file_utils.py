@@ -10,6 +10,14 @@ import pytest
 from hephaestus.utils import file_utils
 
 
+def test_get_agent_directory_name_defaults() -> None:
+    assert file_utils.get_agent_directory_name("claude") == ".Claude"
+    assert file_utils.get_agent_directory_name("gemini") == ".Gemini"
+    assert file_utils.get_agent_directory_name("codex") == ".Codex"
+    # Unknown types should fall back to Claude directory
+    assert file_utils.get_agent_directory_name("unknown") == ".Claude"
+
+
 def test_get_work_directory_defaults_to_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     expected = tmp_path / file_utils.WORK_DIR_NAME
