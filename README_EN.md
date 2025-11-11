@@ -16,6 +16,14 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 - **Automatic Task Distribution**: Markdown-based file communication for task assignment
 - **Enforced Communication Protocol**: Reliable inter-agent communication using `hephaestus send`
 
+## UI
+
+**Image Sample**  
+<img src=./media/ui-sample.png width=600>
+
+**Working Sample**  
+<img src=./media/working-sample.gif width=600>
+
 ## Prerequisites
 
 - Python 3.10 or higher
