@@ -31,7 +31,7 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 - One of the following AI agents:
   - [Claude Code](https://github.com/anthropics/claude-code)
   - [Gemini CLI](https://github.com/google/gemini-cli)
-  - ChatGPT Codex
+  - [ChatGPT Codex](https://chatgpt.com/codex)
 - Linux operating system
 
 ## Use Cases
