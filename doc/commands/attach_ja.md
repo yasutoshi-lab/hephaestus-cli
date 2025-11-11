@@ -25,6 +25,17 @@ hephaestus attach [OPTIONS]
 3. `--change-agent` が指定されている場合、tmux起動前に `config.yaml` と `.Claude/`（もしくは `.Gemini/`, `.Codex/`）を再生成します（事前に `hephaestus kill` を実行してセッションを停止してください）
 4. tmuxセッション内では、Master + Workerエージェントがそれぞれ別のペインで起動します
 
+### ヘッドレスモードへのフォールバック
+
+tmuxがインストールされていない、もしくは `error connecting to /tmp/tmux-1000/default (Operation not permitted)` のようにソケットへ接続できない場合でも、コマンドは失敗せず自動的にヘッドレスモードへ切り替わります。
+
+- 現在のターミナルにエージェント名・PID・ログパス・稼働状況を表示するパネルが現れます
+- `Ctrl+C` でパネルを抜けてもエージェントはバックグラウンドで動作し続けます
+- 別ターミナルで `hephaestus logs --all -f`（または `-a master`, `-a worker-1` など）を実行するとログをリアルタイムで追跡できます
+- 停止したい場合は通常どおり `hephaestus kill` を実行するだけでヘッドレスセッションも終了します
+
+tmuxが再び利用可能になれば、次回 `hephaestus attach` 実行時に何もせず従来のtmuxセッションへ戻ります。
+
 ## 使用例
 
 ### 既存セッションにアタッチ

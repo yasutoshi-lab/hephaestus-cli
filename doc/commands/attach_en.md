@@ -25,6 +25,17 @@ hephaestus attach [OPTIONS]
 3. If `--change-agent` is provided, the command rewrites `config.yaml` and regenerates agent persona files before creating the tmux session (requires the previous session to be stopped via `hephaestus kill`)
 4. Within the tmux session, Master + Worker agents start in separate panes
 
+### Headless Fallback Mode
+
+The command automatically detects when tmux cannot be used (missing binary, sandboxed terminals printing `error connecting to /tmp/tmux-1000/default (Operation not permitted)`, etc.) and transparently switches to headless mode instead of failing.
+
+- A Rich-based dashboard is shown in the current terminal listing agent names, PIDs, log paths, and live status
+- Agents continue running in the background; press `Ctrl+C` to exit the dashboard at any time
+- Use `hephaestus logs --all -f` (or `-a master`, `-a worker-1`, etc.) in another terminal to stream output while in headless mode
+- Run `hephaestus kill` to stop the headless session; no additional flags are required
+
+Once tmux becomes available again, `hephaestus attach` transparently returns to tmux without manual cleanup.
+
 ## Examples
 
 ### Attach to Existing Session

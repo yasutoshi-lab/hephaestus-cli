@@ -2,7 +2,7 @@
 
 ## Overview
 
-`hephaestus kill` stops all agents and terminates the tmux session.
+`hephaestus kill` stops all agents and terminates the tmux session. When the CLI is running in headless fallback mode (no tmux available), this command stops the background agents and removes the headless session metadata as well.
 
 ## Usage
 
@@ -22,8 +22,10 @@ hephaestus kill [OPTIONS]
 1. Check if session exists
 2. Display confirmation prompt (unless `--force` option is used)
 3. Save session state
-4. Terminate tmux session
+4. Terminate tmux session **or** stop headless agents if tmux is unavailable
 5. Stop all agent processes
+
+If a headless session is active (created automatically when tmux cannot be used), steps 4 and 5 send `SIGTERM` to each recorded agent PID and delete `.hephaestus-work/cache/headless_session.json`, ensuring the next `attach` starts cleanly.
 
 ## Examples
 

@@ -2,7 +2,7 @@
 
 > 🏗️ Under Development
 
-A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Workers) to execute complex tasks collaboratively.
+A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Workers) to execute complex tasks collaboratively. When tmux can't be used (e.g., CI containers or sandboxed terminals), it automatically falls back to a headless, log-driven mode so agents keep running.
 
 > 📖 [日本語README](README.md) | 📚 [Detailed Documentation](doc/commands/)
 
@@ -13,6 +13,7 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 - **Real-Time Monitoring**: TUI dashboard and log streaming for visibility
 - **Strict Persona Management**: Force-inject agent roles at startup
 - **Tmux Integration**: Visual management of multiple agents in split panes
+- **Headless Fallback**: Automatically switches to a background/headless runner when tmux is unavailable, with log streaming + status panel
 - **Automatic Task Distribution**: Markdown-based file communication for task assignment
 - **Enforced Communication Protocol**: Reliable inter-agent communication using `hephaestus send`
 
@@ -27,7 +28,7 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
 ## Prerequisites
 
 - Python 3.10 or higher
-- tmux
+- tmux (recommended; the CLI falls back to headless mode automatically if tmux is missing or blocked)
 - One of the following AI agents:
   - [Claude Code](https://github.com/anthropics/claude-code)
   - [Gemini CLI](https://github.com/google/gemini-cli)
@@ -88,6 +89,7 @@ hephaestus init --agent-type claude    # Use Claude Code (explicit)
 
 # 2. Start session
 hephaestus attach --create
+#   ↳ Automatically falls back to headless mode when tmux can't be used and shows a lightweight dashboard
 
 # 3. Work
 # - Input high-level tasks in Master pane
@@ -101,6 +103,16 @@ hephaestus logs -a master -f    # Log streaming
 # 5. Stop
 hephaestus kill
 ```
+
+### Operating Without tmux
+
+`hephaestus attach --create` first attempts to launch a tmux session. If tmux is not installed, is disallowed, or prints errors such as `error connecting to /tmp/tmux-1000/default (Operation not permitted)`, Hephaestus automatically switches to headless mode.
+
+- A lightweight dashboard appears in the current terminal listing each agent's PID, log path, and status
+- Agent stdout/stderr are continuously written to `.hephaestus-work/logs/*.log`; use another terminal to run `hephaestus logs --all -f` or `hephaestus logs -a master -f` for real-time streaming
+- Pressing `Ctrl+C` exits the dashboard but keeps agents running; use `hephaestus kill` whenever you want to stop them
+
+When tmux becomes available again, the next `hephaestus attach` automatically returns to the regular tmux session—no extra steps needed.
 
 ### Switching Agents After Rate Limits
 
@@ -211,6 +223,10 @@ cat .hephaestus-work/logs/communication.log
 tmux -V    # Check if tmux is installed
 which claude    # Check if claude is available
 ```
+
+**`error connecting to /tmp/tmux-XXXX/default (Operation not permitted)` appears**
+- tmux cannot create or access its socket in this environment. The CLI automatically switches to headless mode—just follow the on-screen instructions
+- Stream logs with `hephaestus logs --all -f`. When tmux becomes available again, run `hephaestus attach` to re-enter the normal tmux session
 
 **Agents not communicating**
 ```bash

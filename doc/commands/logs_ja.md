@@ -106,6 +106,16 @@ hephaestus logs -a communication -f
 hephaestus logs -a system
 ```
 
+## ヘッドレスモードでの使い方
+
+`hephaestus attach` がヘッドレスモードへフォールバックした場合（tmuxが利用できない環境など）、このコマンドがエージェント出力を確認するメイン手段になります。
+
+- `hephaestus logs --all -f` で全エージェントのログを同時に追跡
+- `-a master` や `-a worker-1` などを指定して特定エージェントに絞り込む
+- `.hephaestus-work/logs/` 以下のログは自動的に作成されるため、エージェントが出力を出す前から `-f` で待ち受けできます
+
+作業が完了したら `hephaestus kill` でヘッドレスセッションを停止してください。
+
 ## 色分け表示
 
 ログは見やすいように、エージェントごとに色分けされて表示されます：

@@ -106,6 +106,16 @@ hephaestus logs -a communication -f
 hephaestus logs -a system
 ```
 
+## Headless Mode Usage
+
+When `hephaestus attach` falls back to headless mode (because tmux is unavailable), this command becomes the primary way to observe agent output:
+
+- Use `hephaestus logs --all -f` to tail every agent log concurrently while the headless dashboard is running
+- Narrow the stream with `-a master`, `-a worker-1`, etc. to debug a single agent
+- The command automatically creates log files under `.hephaestus-work/logs/` if they do not exist yet, so you can start following logs even before the agents emit output
+
+Combine this with `hephaestus kill` to stop headless sessions when you are done.
+
 ## Color-coded Display
 
 Logs are color-coded by agent for easy viewing:

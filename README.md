@@ -1,6 +1,6 @@
 # Hephaestus
 
-複数のLLMエージェント（Master + Workers）を管理し、複雑なタスクを協調実行するためのtmuxベースのマルチエージェントCLIツールです。
+複数のLLMエージェント（Master + Workers）を管理し、複雑なタスクを協調実行するためのtmuxベースのマルチエージェントCLIツールです。tmuxが使用できない環境（CIや制限付きサンドボックスなど）でも、自動的にヘッドレスモードへフォールバックし、ログ駆動でエージェントを継続実行します。
 
 > 📖 [English README](README_EN.md) | 📚 [詳細ドキュメント](doc/commands/)
 
@@ -11,6 +11,7 @@
 - **リアルタイム監視**: TUIダッシュボードとログストリーミングで状態を可視化
 - **厳格なペルソナ管理**: 起動時にエージェントの役割を強制注入
 - **Tmux統合**: 分割ペインで複数エージェントを視覚的に管理
+- **ヘッドレスフォールバック**: tmuxが利用できない場合でも自動的にバックグラウンド起動し、ログと簡易ダッシュボードで制御
 - **自動タスク分配**: Markdownベースのファイル通信でタスクを自動配布
 - **強制通信プロトコル**: `hephaestus send` を使用した確実なエージェント間通信
 
@@ -25,7 +26,7 @@
 ## 前提条件
 
 - Python 3.10以上
-- tmux
+- tmux（推奨。利用できない場合は自動的にヘッドレスモードに切り替わります）
 - 以下のいずれかのAIエージェント:
   - [Claude Code](https://github.com/anthropics/claude-code)
   - [Gemini CLI](https://github.com/google/gemini-cli)
@@ -86,6 +87,7 @@ hephaestus init --agent-type claude    # Claude Code（明示的指定）
 
 # 2. セッション開始
 hephaestus attach --create
+#   ↳ tmuxに接続できない環境では自動的にヘッドレスモードへ切り替わり、簡易ダッシュボードが表示されます
 
 # 3. 操作
 # - Masterペインで高レベルのタスクを入力
@@ -99,6 +101,16 @@ hephaestus logs -a master -f    # ログ追跡
 # 5. 停止
 hephaestus kill
 ```
+
+### tmuxが使えない環境での動作
+
+`hephaestus attach --create` はまずtmuxセッションを起動しようとしますが、tmux未インストール/禁止、または `error connecting to /tmp/tmux-1000/default (Operation not permitted)` のようにtmuxソケットへ接続できない場合は自動的にヘッドレスモードにフォールバックします。
+
+- CLIにはヘッドレスセッション用のパネルが表示され、各エージェントのPID・ログパス・稼働状況を確認できます
+- エージェントの標準出力/エラーは `.hephaestus-work/logs/*.log` に出力されるため、別ターミナルで `hephaestus logs --all -f` や `hephaestus logs -a master -f` を実行してリアルタイムに追跡してください
+- `Ctrl+C` でパネルを抜けてもエージェントは継続実行します。終了したい場合のみ `hephaestus kill` を実行します
+
+tmuxが利用可能になれば、次回 `hephaestus attach` 実行時に自動で通常のtmuxセッションへ戻ります。
 
 ### レート制限に到達した後のエージェント切り替え
 
@@ -209,6 +221,10 @@ cat .hephaestus-work/logs/communication.log
 tmux -V    # tmuxがインストールされているか確認
 which claude    # claudeが利用可能か確認
 ```
+
+**`error connecting to /tmp/tmux-XXXX/default (Operation not permitted)` と表示される**
+- 環境側でtmuxソケットが作成できない状態です。`hephaestus attach --create` は自動的にヘッドレスモードへ切り替わるので、そのまま画面の案内に従ってください
+- ログは `hephaestus logs --all -f` で追跡できます。tmuxが利用可能になったら再度 `attach` を実行すると通常のtmuxセッションに戻ります
 
 **エージェントが通信しない**
 ```bash
