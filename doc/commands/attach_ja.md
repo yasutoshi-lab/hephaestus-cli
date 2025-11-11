@@ -15,13 +15,15 @@ hephaestus attach [OPTIONS]
 | オプション | 短縮形 | 説明 |
 |-----------|--------|------|
 | `--create` | `-c` | セッションが存在しない場合、新しく作成 |
+| `--change-agent <type>` | - | アタッチ前にエージェント設定を `claude` / `gemini` / `codex` に差し替え（事前に `hephaestus kill` が必要） |
 | `--help` | - | ヘルプメッセージを表示 |
 
 ## 動作
 
 1. 既存のtmuxセッションが存在する場合、そのセッションにアタッチします
 2. `--create`オプションが指定されている場合、セッションが存在しなければ新規作成します
-3. tmuxセッション内では、Master + Workerエージェントがそれぞれ別のペインで起動します
+3. `--change-agent` が指定されている場合、tmux起動前に `config.yaml` と `.Claude/`（もしくは `.Gemini/`, `.Codex/`）を再生成します（事前に `hephaestus kill` を実行してセッションを停止してください）
+4. tmuxセッション内では、Master + Workerエージェントがそれぞれ別のペインで起動します
 
 ## 使用例
 
@@ -38,6 +40,15 @@ hephaestus attach --create
 ```
 
 初回起動時は必ず `--create` オプションが必要です。
+
+### レート制限到達後にエージェントを切り替え
+
+```bash
+hephaestus kill
+hephaestus attach --create --change-agent codex
+```
+
+既存の `.Claude/` ディレクトリと `config.yaml` が指定したエージェント設定に置き換えられます。
 
 ## tmuxセッション内の操作
 
@@ -66,7 +77,7 @@ hephaestus attach --create
 
 各エージェントは起動時に以下の処理が行われます：
 
-1. **ペルソナ注入**: CLAUDE.mdの内容が自動的に読み込まれ、エージェントに役割が割り当てられます
+1. **ペルソナ注入**: エージェント種別に対応したREADME（`CLAUDE.md` / `GEMINI.md` / `AGENT.md`）が読み込まれ、役割が割り当てられます
 2. **初期化確認**: エージェントが役割を認識したことを確認します
 3. **待機状態**: タスクの割り当てを待ちます
 
@@ -111,6 +122,7 @@ brew install tmux
 ## 注意事項
 
 - セッションからデタッチしても、エージェントは実行を継続します
+- `--change-agent` を使う前に、必ず `hephaestus kill` で既存セッションを終了してください
 - 再度アタッチすれば、同じセッションに戻れます
 - セッションを終了するには `hephaestus kill` を使用してください
 

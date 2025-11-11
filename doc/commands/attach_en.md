@@ -15,13 +15,15 @@ hephaestus attach [OPTIONS]
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--create` | `-c` | Create a new session if one doesn't exist |
+| `--change-agent <type>` | - | Replace agent configuration with `claude`, `gemini`, or `codex` before attaching (session must not be running) |
 | `--help` | - | Show help message |
 
 ## Behavior
 
 1. If an existing tmux session exists, attach to that session
 2. If `--create` option is specified, create a new session if one doesn't exist
-3. Within the tmux session, Master + Worker agents start in separate panes
+3. If `--change-agent` is provided, the command rewrites `config.yaml` and regenerates agent persona files before creating the tmux session (requires the previous session to be stopped via `hephaestus kill`)
+4. Within the tmux session, Master + Worker agents start in separate panes
 
 ## Examples
 
@@ -38,6 +40,15 @@ hephaestus attach --create
 ```
 
 The `--create` option is required for first-time startup.
+
+### Change Agent After Hitting Rate Limits
+
+```bash
+hephaestus kill
+hephaestus attach --create --change-agent codex
+```
+
+This sequence replaces `.Claude/` (or `.Gemini/`, `.Codex/`) and updates `config.yaml` so the next tmux session boots with the newly selected agent.
 
 ## Operations Within tmux Session
 
@@ -66,7 +77,7 @@ After attaching, the following tmux key bindings are available:
 
 Each agent undergoes the following process on startup:
 
-1. **Persona Injection**: CLAUDE.md content is automatically loaded and role is assigned to agent
+1. **Persona Injection**: The agent-specific README (e.g., `CLAUDE.md`, `GEMINI.md`, `AGENT.md`) is automatically loaded and role is assigned to agent
 2. **Initialization Confirmation**: Confirms agent recognizes its role
 3. **Waiting State**: Waits for task assignment
 
@@ -111,6 +122,7 @@ brew install tmux
 ## Notes
 
 - Detaching from session does not stop agents - they continue running
+- Use `--change-agent` only after stopping the current session (`hephaestus kill`) to avoid conflicts
 - You can reattach to the same session later
 - Use `hephaestus kill` to terminate the session
 

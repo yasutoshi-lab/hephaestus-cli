@@ -3,16 +3,17 @@
 This module implements the command-line interface using Click.
 """
 
-import click
 import sys
 from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+import click
 
 from .utils.logger import setup_logger
 from .utils.file_utils import create_directory_structure, get_work_directory, create_agent_config_files
-from .config import create_default_config, ConfigManager
+from .utils.agent_switcher import switch_agent_environment
+from .config import create_default_config, ConfigManager, AGENT_COMMANDS
 from .session_manager import SessionManager
 from .agent_communicator import AgentCommunicator
 from .task_distributor import TaskDistributor
@@ -138,7 +139,12 @@ def init_command(workers: int, force: bool, agent_type: str):
     is_flag=True,
     help="Create a new session if one doesn't exist",
 )
-def attach_command(create: bool):
+@click.option(
+    "--change-agent",
+    type=click.Choice(["claude", "gemini", "codex"], case_sensitive=False),
+    help="Reconfigure the workspace to use a different agent type before attaching",
+)
+def attach_command(create: bool, change_agent: str | None):
     """Attach to the tmux session with all agents.
 
     Opens a tmux session showing Master and Worker agents in split panes.
@@ -166,7 +172,34 @@ def attach_command(create: bool):
         config_manager = ConfigManager(config_path)
         config = config_manager.load()
 
-        # Create session manager
+        # Allow agent switching before creating the session
+        if change_agent:
+            change_agent = change_agent.lower()
+            session_manager = SessionManager(config, work_dir)
+            if session_manager.session_exists():
+                console.print(
+                    Panel(
+                        "[red]Cannot change agent while a session is running.[/red]\n\n"
+                        "Run [bold]hephaestus kill[/bold] first, then re-run attach with --change-agent.",
+                        title="Session Active",
+                        border_style="red",
+                    )
+                )
+                sys.exit(1)
+
+            console.print(f"[cyan]Switching agent type to {change_agent}...[/cyan]")
+            switch_agent_environment(work_dir, config, config_manager, change_agent)
+            config = config_manager.load()
+            console.print(
+                Panel(
+                    f"[green]Agent updated:[/green] {change_agent}\n"
+                    f"Commands now use: [bold]{AGENT_COMMANDS[change_agent]}[/bold]",
+                    title="Agent Reconfigured",
+                    border_style="green",
+                )
+            )
+
+        # Create session manager (refresh in case config changed)
         session_manager = SessionManager(config, work_dir)
 
         # Check if session exists
