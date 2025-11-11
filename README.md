@@ -100,6 +100,17 @@ hephaestus logs -a master -f    # ログ追跡
 hephaestus kill
 ```
 
+### レート制限に到達した後のエージェント切り替え
+
+APIの制限に達した場合でも、ワークスペースを作り直すことなく別のエージェントに切り替えられます：
+
+```bash
+hephaestus kill  # 実行中のtmuxセッションを停止
+hephaestus attach --create --change-agent codex
+```
+
+これにより `.hephaestus-work/` 配下の `.Claude/` / `.Gemini/` / `.Codex/` と `config.yaml` が再生成され、`tasks/` や `logs/` などの作業成果は維持されます。
+
 ## 設定
 
 `.hephaestus-work/config.yaml`を編集してカスタマイズ：

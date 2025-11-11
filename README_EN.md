@@ -102,6 +102,17 @@ hephaestus logs -a master -f    # Log streaming
 hephaestus kill
 ```
 
+### Switching Agents After Rate Limits
+
+If your current agent hits an API limit, you can swap to another provider without recreating the workspace:
+
+```bash
+hephaestus kill  # stop the running tmux session
+hephaestus attach --create --change-agent codex
+```
+
+This command regenerates `.Claude/`, `.Gemini/`, or `.Codex/` inside `.hephaestus-work/` along with `config.yaml`, while leaving `tasks/`, `logs/`, `communication/`, etc. untouched.
+
 ## Configuration
 
 Edit `.hephaestus-work/config.yaml` to customize:
