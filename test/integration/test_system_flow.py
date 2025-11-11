@@ -11,10 +11,10 @@ from hephaestus.utils.file_utils import create_agent_config_files, create_direct
 def test_end_to_end_task_assignment_and_completion(tmp_path: Path) -> None:
     base_path = tmp_path / "workspace"
     work_dir = create_directory_structure(base_path)
-    create_agent_config_files(work_dir)
+    create_agent_config_files(work_dir, agent_type="claude")
 
     config_path = work_dir / "config.yaml"
-    create_default_config(config_path)
+    create_default_config(config_path, agent_type="claude")
     config_manager = ConfigManager(config_path)
     config = config_manager.load()
 
@@ -60,4 +60,44 @@ def test_end_to_end_task_assignment_and_completion(tmp_path: Path) -> None:
     stats = task_manager.get_statistics()
     assert stats["completed"] == 1
     assert stats["pending"] == 0
+
+
+def test_end_to_end_with_gemini_agent(tmp_path: Path) -> None:
+    base_path = tmp_path / "workspace_gemini"
+    work_dir = create_directory_structure(base_path)
+    create_agent_config_files(work_dir, agent_type="gemini")
+
+    config_path = work_dir / "config.yaml"
+    config = create_default_config(config_path, agent_type="gemini")
+
+    # Verify gemini configuration
+    assert config.agent_type == "gemini"
+    assert config.master.command == "gemini --yolo"
+    assert config.workers.command == "gemini --yolo"
+
+    # Verify GEMINI.md files exist
+    claude_dir = work_dir / ".claude"
+    assert (claude_dir / "GEMINI.md").exists()
+    assert (claude_dir / "master" / "GEMINI.md").exists()
+    assert (claude_dir / "worker" / "GEMINI.md").exists()
+
+
+def test_end_to_end_with_codex_agent(tmp_path: Path) -> None:
+    base_path = tmp_path / "workspace_codex"
+    work_dir = create_directory_structure(base_path)
+    create_agent_config_files(work_dir, agent_type="codex")
+
+    config_path = work_dir / "config.yaml"
+    config = create_default_config(config_path, agent_type="codex")
+
+    # Verify codex configuration
+    assert config.agent_type == "codex"
+    assert config.master.command == "codex --full-auto"
+    assert config.workers.command == "codex --full-auto"
+
+    # Verify AGENT.md files exist
+    claude_dir = work_dir / ".claude"
+    assert (claude_dir / "AGENT.md").exists()
+    assert (claude_dir / "master" / "AGENT.md").exists()
+    assert (claude_dir / "worker" / "AGENT.md").exists()
 

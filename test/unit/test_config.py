@@ -20,6 +20,7 @@ from hephaestus.config import (
 def test_config_from_and_to_dict_roundtrip() -> None:
     data = {
         "version": "2.0",
+        "agent_type": "gemini",
         "agents": {
             "master": {"enabled": False, "command": "master-cmd", "args": ["--debug"]},
             "workers": {"count": 5, "command": "worker-cmd", "args": ["--fast"]},
@@ -32,6 +33,7 @@ def test_config_from_and_to_dict_roundtrip() -> None:
 
     config = Config.from_dict(data)
     assert config.version == "2.0"
+    assert config.agent_type == "gemini"
     assert config.master == AgentConfig(enabled=False, command="master-cmd", args=["--debug"])
     assert config.workers == WorkersConfig(count=5, command="worker-cmd", args=["--fast"])
     assert config.monitoring == MonitoringConfig(10, 5, 2)
@@ -76,4 +78,37 @@ def test_create_default_config_writes_file(tmp_path: Path) -> None:
     config = create_default_config(config_path)
     assert config_path.exists()
     assert config.version == "1.0"
+    assert config.agent_type == "claude"
+    assert config.master.command == "claude --dangerously-skip-permissions"
+    assert config.workers.command == "claude --dangerously-skip-permissions"
+
+
+def test_create_default_config_with_claude_agent() -> None:
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = Path(tmp_dir) / "config.yaml"
+        config = create_default_config(config_path, agent_type="claude")
+        assert config.agent_type == "claude"
+        assert config.master.command == "claude --dangerously-skip-permissions"
+        assert config.workers.command == "claude --dangerously-skip-permissions"
+
+
+def test_create_default_config_with_gemini_agent() -> None:
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = Path(tmp_dir) / "config.yaml"
+        config = create_default_config(config_path, agent_type="gemini")
+        assert config.agent_type == "gemini"
+        assert config.master.command == "gemini --yolo"
+        assert config.workers.command == "gemini --yolo"
+
+
+def test_create_default_config_with_codex_agent() -> None:
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = Path(tmp_dir) / "config.yaml"
+        config = create_default_config(config_path, agent_type="codex")
+        assert config.agent_type == "codex"
+        assert config.master.command == "codex --full-auto"
+        assert config.workers.command == "codex --full-auto"
 
