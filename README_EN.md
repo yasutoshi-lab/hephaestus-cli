@@ -158,6 +158,11 @@ tmux:
 - `gemini`: `gemini --yolo`
 - `codex`: `codex --full-auto`
 
+**Technical Note - Persona Injection Methods:**
+Each agent type uses a different persona injection approach at startup:
+- **Claude Code / Gemini CLI**: After agent startup, waits 3 seconds then injects persona via `echo` commands
+- **ChatGPT Codex**: Passes persona as a command-line argument at startup (executed as `codex "PERSONA" --full-auto` via temporary script file)
+
 ## Commands
 
 | Command | Description | Documentation |

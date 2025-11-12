@@ -89,7 +89,10 @@ After attaching, the following tmux key bindings are available:
 Each agent undergoes the following process on startup:
 
 1. **Persona Injection**: The agent-specific README (e.g., `CLAUDE.md`, `GEMINI.md`, `AGENT.md`) is automatically loaded and role is assigned to agent
+   - **Claude Code / Gemini CLI**: After agent startup, waits 3 seconds then injects persona via `echo` commands
+   - **ChatGPT Codex**: Passes persona as a command-line argument at startup (via temporary script file)
 2. **Initialization Confirmation**: Confirms agent recognizes its role
+   - All agents respond with "✓ [Agent Name] initialized and ready. Role acknowledged."
 3. **Waiting State**: Waits for task assignment
 
 ## Errors and Solutions

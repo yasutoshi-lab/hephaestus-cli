@@ -240,7 +240,10 @@ class SessionManager:
             raise
 
     def _start_agent_in_pane(self, pane: libtmux.Pane, agent_type: str, agent_id: int) -> None:
-        """Start an agent (claude) in a tmux pane.
+        """Start an agent in a tmux pane with agent-type specific persona injection.
+
+        For Codex agents, persona is injected via command-line argument at startup.
+        For Claude/Gemini agents, persona is injected post-startup via echo commands.
 
         Args:
             pane: Tmux pane object

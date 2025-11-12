@@ -89,7 +89,10 @@ hephaestus attach --create --change-agent codex
 各エージェントは起動時に以下の処理が行われます：
 
 1. **ペルソナ注入**: エージェント種別に対応したREADME（`CLAUDE.md` / `GEMINI.md` / `AGENT.md`）が読み込まれ、役割が割り当てられます
+   - **Claude Code / Gemini CLI**: エージェント起動後、3秒待機してから `echo` コマンド経由でペルソナを注入
+   - **ChatGPT Codex**: 起動時に引数としてペルソナを渡す（一時スクリプトファイル経由）
 2. **初期化確認**: エージェントが役割を認識したことを確認します
+   - すべてのエージェントが "✓ [Agent Name] initialized and ready. Role acknowledged." と応答します
 3. **待機状態**: タスクの割り当てを待ちます
 
 ## エラーと対処
