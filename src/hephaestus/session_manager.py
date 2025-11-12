@@ -281,23 +281,89 @@ class SessionManager:
         pane.send_keys(f"echo '═══════════════════════════════════════'")
         pane.send_keys("")
 
-        # Start claude
+        # Start agent with agent-type specific handling
         command = self.config.master.command if agent_type == "master" else self.config.workers.command
         args = self.config.master.args if agent_type == "master" else self.config.workers.args
 
-        # Build command with arguments
-        cmd_parts = [command] + args
-        full_command = " ".join(cmd_parts)
-
-        # Start the agent
-        pane.send_keys(full_command)
-
-        logger.info(f"Started {agent_name} in pane {pane.id}")
-
-        # Inject persona after a brief delay to allow claude to start
+        # Agent-type specific persona injection
         import time
-        time.sleep(3)  # Wait for claude to initialize
-        self._inject_persona(pane, agent_type, agent_name)
+
+        if self.config.agent_type == "codex":
+            # For Codex: inject persona at startup via command argument
+            persona_content = self._load_persona(agent_type)
+            if persona_content:
+                # Create initialization prompt (same as _inject_persona)
+                init_prompt = f"""You are now initializing as {agent_name} in the Hephaestus multi-agent system.
+
+【CRITICAL ROLE ASSIGNMENT】
+Your role is strictly defined. You MUST adhere to this role at all times.
+Deviating from this role is NOT permitted.
+
+{persona_content}
+
+【CONFIRMATION】
+Please confirm your role by responding: "✓ {agent_name} initialized and ready. Role acknowledged."
+
+After confirmation, you will begin receiving tasks according to your role."""
+
+                # Create a temporary script to launch codex with persona
+                # This avoids complex shell escaping issues
+                import tempfile
+                import os
+
+                # Create a temporary script file
+                script_fd, script_path = tempfile.mkstemp(
+                    suffix=".sh",
+                    dir=agent_work_dir,
+                    prefix=".codex_init_",
+                    text=True
+                )
+
+                try:
+                    # Write the script that launches codex with persona
+                    with os.fdopen(script_fd, 'w') as script_file:
+                        script_file.write("#!/bin/bash\n")
+                        script_file.write(f"PERSONA=$(cat << 'PERSONA_EOF'\n")
+                        script_file.write(init_prompt)
+                        script_file.write("\nPERSONA_EOF\n")
+                        script_file.write(")\n")
+                        script_file.write(f'{command} "$PERSONA" {" ".join(args)}\n')
+
+                    # Make the script executable
+                    os.chmod(script_path, 0o755)
+
+                    # Start the agent by running the script
+                    full_command = script_path
+
+                    logger.info(f"Starting {agent_name} with persona injection via command argument")
+                except Exception as e:
+                    logger.error(f"Failed to create initialization script: {e}")
+                    # Fallback to basic command
+                    cmd_parts = [command] + args
+                    full_command = " ".join(cmd_parts)
+            else:
+                logger.warning(f"Persona file not found for {agent_type}, starting without persona")
+                cmd_parts = [command] + args
+                full_command = " ".join(cmd_parts)
+
+            # Start the agent
+            pane.send_keys(full_command)
+            logger.info(f"Started {agent_name} in pane {pane.id}")
+
+        else:
+            # For Claude/Gemini: use traditional post-startup persona injection
+            # Build command with arguments
+            cmd_parts = [command] + args
+            full_command = " ".join(cmd_parts)
+
+            # Start the agent
+            pane.send_keys(full_command)
+
+            logger.info(f"Started {agent_name} in pane {pane.id}")
+
+            # Inject persona after a brief delay to allow agent to start
+            time.sleep(3)  # Wait for agent to initialize
+            self._inject_persona(pane, agent_type, agent_name)
 
     def _inject_persona(self, pane: libtmux.Pane, agent_type: str, agent_name: str) -> None:
         """Inject persona configuration into agent on startup.
