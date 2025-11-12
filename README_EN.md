@@ -35,6 +35,14 @@ A tmux-based multi-agent CLI tool for managing multiple LLM agents (Master + Wor
   - [ChatGPT Codex](https://chatgpt.com/codex)
 - Linux operating system
 
+## Verified Environment
+
+- OS: Ubuntu24.04.5
+- tmux: 3.2a
+- Claude-Code: v0.57.0  
+- Gemini-CLI: v0.14.0  
+- Codex-CLI: v2.0.37 
+
 ## Use Cases
 
 - Research
